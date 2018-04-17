@@ -30,10 +30,18 @@ class DbSettings
     private $config;
 
     /**
-     * @param string $file path to app/etc/local.xml
+     * @var string
      */
-    public function __construct($file)
+    private $configNode;
+
+    /**
+     * @param string $file path to app/etc/local.xml
+     * @param string $configNode
+     */
+    public function __construct(string $file, string $configNode = 'default_setup')
     {
+        $this->configNode = $configNode;
+
         $this->setFile($file);
     }
 
@@ -50,7 +58,7 @@ class DbSettings
             );
         }
 
-        $saved = libxml_use_internal_errors(true);
+        $saved  = libxml_use_internal_errors(true);
         $config = simplexml_load_file($file);
         libxml_use_internal_errors($saved);
 
@@ -65,8 +73,10 @@ class DbSettings
             throw new InvalidArgumentException('DB global resources was not found in "app/etc/local.xml"-file');
         }
 
-        if (!$resources->default_setup->connection) {
-            throw new InvalidArgumentException('DB settings (default_setup) was not found in "app/etc/local.xml"-file');
+        if (!$resources->{$this->configNode}->connection) {
+            throw new InvalidArgumentException(
+                sprintf('DB settings (%s) was not found in "app/etc/local.xml"-file', $this->configNode)
+            );
         }
 
         $this->parseResources($resources);
@@ -89,7 +99,7 @@ class DbSettings
             'password'    => null,
         );
 
-        $config = array_merge($config, (array) $resources->default_setup->connection);
+        $config = array_merge($config, (array) $resources->{$this->configNode}->connection);
         $config['prefix'] = (string) $resources->db->table_prefix;
 
         // known parameters: host, port, unix_socket, dbname, username, password, options, charset, persistent,
@@ -111,12 +121,12 @@ class DbSettings
         $this->config = $config;
 
         $this->tablePrefix = $config['prefix'];
-        $this->host = $config['host'];
-        $this->port = $config['port'];
-        $this->unixSocket = $config['unix_socket'];
-        $this->dbName = $config['dbname'];
-        $this->username = $config['username'];
-        $this->password = $config['password'];
+        $this->host        = $config['host'];
+        $this->port        = $config['port'];
+        $this->unixSocket  = $config['unix_socket'];
+        $this->dbName      = $config['dbname'];
+        $this->username    = $config['username'];
+        $this->password    = $config['password'];
     }
 
     /**
