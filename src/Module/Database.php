@@ -52,7 +52,7 @@ class Database extends Db
 
         $this->debugSection('MS-DB-Middleware',
             sprintf("Trying to connect to '%s', user: '%s', db: '%s'. Full DSN: '%s'.",
-                $dbSettings->getDsn(), $dbSettings->getUsername(), $dbSettings->getDatabaseName(), $config['dsn'])
+                $dbSettings->getDsn(), $dbSettings->getUsername(), $dbSettings->getDatabaseName(), $_config['dsn'])
         );
 
         parent::__construct($moduleContainer, $_config);
